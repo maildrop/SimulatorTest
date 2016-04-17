@@ -88,22 +88,88 @@ public final class SimulatorTest2 {
 		return;
 	}
 
+	private static class int_pair{
+		public int x;
+		public int y;
+		private int_pair( int x , int y ){
+			this.x = x;
+			this.y = y;
+		}
+		private int_pair( int_pair r ){
+			this.x = r.x;
+			this.y = r.y;
+		}
+		private static final void swap( int_pair l , int_pair r ){
+			final int_pair tmp = new int_pair( l );
+			l.x = r.x ;
+			l.y = r.y ;
+			r.x = tmp.x;
+			r.y = tmp.y;
+		}
+
+		// atan-1 の順番に並べるための式
+		private static final float theta( int_pair p1 , int_pair p2 ){
+			final int dx = p2.x - p1.x;
+			final int dy = p2.y - p1.y;
+			final int ax = Math.abs( dx );
+			final int ay = Math.abs( dy );
+			float t = ( ax + ay ) == 0 ? 0 : (float)(dy)/((float)ax + (float)ay );
+			if( dx < 0 ){
+				t = 2f -t ;
+			}else if( dy < 0 ){
+				t = t + 4f;
+			}
+			return t; // t*90.0f が degree である。 Windowの座標系が上下逆なことに注意
+		}
+		
+	};
+
+	
 	public static void Test(Pen pen){
 		Random rnd = new Random();
 
-		ArrayList<Point> points = new ArrayList<Point>();
-		Point p1 = new Point(rnd.nextInt(pen.canvas.getWidth()), rnd.nextInt(pen.canvas.getHeight()));
-		Point p2 = new Point(rnd.nextInt(pen.canvas.getWidth()), rnd.nextInt(pen.canvas.getHeight()));
-		Point p3 = new Point(rnd.nextInt(pen.canvas.getWidth()), rnd.nextInt(pen.canvas.getHeight()));
+		// y 軸 の頂点に最も近い点を、基準点にもってきて、
+		// 左回りに点を整列させる。
+		int_pair src[] = {
+			new int_pair( rnd.nextInt(pen.canvas.getWidth()), rnd.nextInt(pen.canvas.getHeight() ) ),
+			new int_pair( rnd.nextInt(pen.canvas.getWidth()), rnd.nextInt(pen.canvas.getHeight() ) ),
+			new int_pair( rnd.nextInt(pen.canvas.getWidth()), rnd.nextInt(pen.canvas.getHeight() ) )
+		};
+		// 基準点を見つけるために、最小のy を持つ int_pair を int_pair[0] に持ってくる
+		if( src[0].y > src[1].y ){
+			int_pair.swap( src[0] , src[1] );
+		}
+		if( src[0].y > src[2].y ){
+			int_pair.swap( src[0] , src[2] ); 
+		}
 
-		points.add(p1);
-		points.add(p2);
-		points.add(p3);
+		if( int_pair.theta( src[0] , src[1] ) < int_pair.theta( src[0], src[2] ) ){
+			int_pair.swap( src[1] , src[2] );
+		}
+
+		
+		final java.util.concurrent.Callable<String> labelGen = new java.util.concurrent.Callable<String>(){
+				int i = 0;
+				public synchronized final String call(){
+					return String.format( "点%c" , 'A' + (i++) );
+				}
+		};
+
+		ArrayList<Point> points = new ArrayList<Point>();
+		for( int_pair p : src ){
+			try{
+				points.add( new Point( p.x , p.y , labelGen.call() ) );
+			}catch( Exception e ){
+				points.add( new Point( p.x , p.y , e.toString() ) );
+			}
+		}
 
 		DrawObject sankaku = new DrawObject(points);
-		pen.Draw(sankaku);
 		sankaku.setText();
-		System.out.printf("%.1f度\n",Ruler.getAngle(p1, p2, p3));
+
+		pen.Draw(sankaku);
+		
+		System.out.println(String.format( "%.1f度",Ruler.getAngle(points.get(0) , points.get(1) , points.get(2) ) ));
 	}
 
 	/**

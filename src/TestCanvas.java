@@ -126,7 +126,7 @@ public class TestCanvas extends javax.swing.JComponent {
 			final Point point = drawObj.points.get( j );
 			x[j] = point.x;
 			y[j] = point.y;
-			System.out.printf("draw Point %d\n", j);
+			// System.out.printf("draw Point %d\n", j);
 		}
 
 		assert nPoints<=x.length : "nPoints<=x.length" ;
