@@ -54,6 +54,8 @@ public class TestCanvas extends javax.swing.JComponent {
 
 		clearBackground( g2 , Color.white);
 
+		g2.setColor( previousColor ); // 一度前景色に戻す
+		
 		System.out.printf("paint\n");
 		
 		for( final DrawObject drawObj : objects ){ // 素直に 拡張 for 文を使う
@@ -64,46 +66,81 @@ public class TestCanvas extends javax.swing.JComponent {
 
 
 	/**
-		 (x,y) に、色 color で 文字 label を描画して、四角で囲む 
+		 (x,y) に、色 color で 文字 label を描画する。
 	 */
 	private static final void drawLabel( Graphics2D g2 , String label , float x , float y , Color color){
-		// TODO ここもう少し頑張る FontMeature 使って頑張る
 		g2.setColor( color );
 		drawLabel( g2 , label , x , y  );
 	}
 
 	/**
-		 (x,y) に 文字 label を描画して四角で囲む
+		 (x,y) に 文字 label を描画する。
 	 */
 	private static final void drawLabel( Graphics2D g2 , String label , float x , float y ){
-		g2.fill( new java.awt.geom.Rectangle2D.Float( x, y , 3f ,3f ) );
-		//g2.drawRect(x, y, 3, 3);
-		g2.drawString(label, x - 10, y  - 10);
+		if( label == null ||  "".equals( label )  ){ // 空文字列は描画しない
+			return;
+		}
+		// 文字列の画面上の幅を計算する。
+		java.text.AttributedCharacterIterator aci =
+			new java.text.AttributedString( label ).getIterator();
+		java.awt.font.TextMeasurer tm =  new java.awt.font.TextMeasurer( aci, g2.getFontRenderContext() );
+		java.awt.font.TextLayout layout = tm.getLayout( aci.getBeginIndex() , aci.getEndIndex() );
+		//g2.fill( new java.awt.geom.Rectangle2D.Float( x ,  y ,  layout.getAdvance(), (layout.getAscent() +  layout.getBaseline() ) ) );
+		g2.drawString(label, x - (layout.getAdvance() / 2.0f) , y  -( layout.getBaseline() + layout.getAscent()) );
 	}
 
 	/**
+		 (x,y) に色 color で点を描画する。
+
+	 */
+	private static final void drawPoint( Graphics2D g2 , float x , float y , Color color ){
+		g2.setColor( color );
+		drawPoint( g2 , x , y  );
+	}
+	/**
+		 (x,y) に点を描画する。
+
+	 */
+	private static final void drawPoint( Graphics2D g2 , float x , float y ){
+		//g2.drawRect(x, y, 3, 3);
+		g2.fill( new java.awt.geom.Rectangle2D.Float( x, y , 3f ,3f ) );
+	}
+	
+	/**
 		 コンポーネントが保持する描画オブジェクトを描画する
+		 描画順は、 まずポリゴンを描画してから、点を描画して点のラベルを描画する。
 	 */
 	private void drawObjects( Graphics2D g2 , DrawObject drawObj ){
 		final int nPoints = drawObj.points.size();
+		System.out.println( nPoints );
 		int[] x = new int[nPoints];
 		int[] y = new int[nPoints];
 
-		int j = 0; // ここ index ベースで必要 どうしよっかね。
-		for( final Point point : drawObj.points ){
-			//this.points.add(point);
+		for( int j = 0; j < nPoints ; ++j ){
+			final Point point = drawObj.points.get( j );
 			x[j] = point.x;
 			y[j] = point.y;
-			drawLabel(g2, point.text,(float)point.x,(float)point.y, point.color);
-			++j;
-			// System.out.printf("draw Point %d\n", j);
+			System.out.printf("draw Point %d\n", j);
 		}
-		
-		g2.setColor(drawObj.color);
 
 		assert nPoints<=x.length : "nPoints<=x.length" ;
 		assert nPoints<=y.length : "nPoints<=y.length" ;
+		final Color color = drawObj.color;
+		if( color != null ){
+			g2.setColor( color );
+		}
+
 		g2.drawPolygon(x, y, nPoints );
+
+		for( final Point point : drawObj.points ){
+			if( point.color != null ){
+				drawPoint(g2, (float)point.x , (float)point.y , point.color ); 
+				drawLabel(g2, point.text,(float)point.x,(float)point.y, point.color); 
+			}else{
+				drawPoint(g2, (float)point.x , (float)point.y );
+				drawLabel(g2, point.text,(float)point.x,(float)point.y );
+			}
+		}
 		return;
 	}
 		
