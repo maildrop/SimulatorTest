@@ -10,7 +10,7 @@ public class Pen{
 
 	public void Draw(DrawObject drawObject){
 		this.canvas.addDrawObject(drawObject);
-		canvas.show();
+		canvas.repaint();
 	}
 
 
