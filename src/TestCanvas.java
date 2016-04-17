@@ -17,7 +17,7 @@ public class TestCanvas extends JPanel {
 	public ArrayList<DrawObject> objects = new ArrayList<DrawObject>();
 
 	public TestCanvas(int width, int height) {
-		// �p�l���̐����T�C�Y��ݒ�Apack()����Ƃ��ɕK�v
+		// Canvasのサイズ設定と生成
 		setPreferredSize(new Dimension(width, height));
 	}
 
