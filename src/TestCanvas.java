@@ -52,6 +52,10 @@ public class TestCanvas extends javax.swing.JComponent {
 	private void paintComponent( Graphics2D g2 ){
 		final Color previousColor = g2.getColor(); // 後で、もとに戻すために保存
 
+		// 描画で使うアンチエイリアスを有効にする
+		g2.setRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING ,
+												 java.awt.RenderingHints.VALUE_ANTIALIAS_ON );
+		
 		clearBackground( g2 , Color.white);
 
 		g2.setColor( previousColor ); // 一度前景色に戻す
@@ -103,7 +107,7 @@ public class TestCanvas extends javax.swing.JComponent {
 	 */
 	private static final void drawPoint( Graphics2D g2 , float x , float y ){
 		//g2.drawRect(x, y, 3, 3);
-		g2.fill( new java.awt.geom.Rectangle2D.Float( x, y , 3f ,3f ) );
+		g2.fill( new java.awt.geom.Rectangle2D.Float( x - 1f, y -1f , 3f ,3f ) );
 	}
 	
 	/**
@@ -111,8 +115,10 @@ public class TestCanvas extends javax.swing.JComponent {
 		 描画順は、 まずポリゴンを描画してから、点を描画して点のラベルを描画する。
 	 */
 	private void drawObjects( Graphics2D g2 , DrawObject drawObj ){
+		final java.awt.Stroke stroke = g2.getStroke(); // 線幅の調整
+		g2.setStroke( new java.awt.BasicStroke( 0.5f ) );
 		final int nPoints = drawObj.points.size();
-		System.out.println( nPoints );
+
 		int[] x = new int[nPoints];
 		int[] y = new int[nPoints];
 
@@ -141,6 +147,7 @@ public class TestCanvas extends javax.swing.JComponent {
 				drawLabel(g2, point.text,(float)point.x,(float)point.y );
 			}
 		}
+		g2.setStroke( stroke ); // 線幅を戻す
 		return;
 	}
 		
