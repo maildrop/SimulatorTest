@@ -84,9 +84,18 @@ public class TestCanvas extends javax.swing.JComponent {
 			 @return 新しく生成したコントロールポイントのラベル
 		 */
 		private synchronized String tryCreateControlpointLabel(int offset){
-			final String controlLabel = ( shapeLabel == null) ?
-				String.format( "点%c" , ( 'A' + control.size() + offset ) ) :
-				String.format( "%s:点%c" , shapeLabel,( 'A' + control.size() + offset ) );
+			final String controlLabel;
+
+			if( offset < ( ('Z' - 'A' + 1) - control.size()) ) {
+				controlLabel = ( shapeLabel == null) ?
+					String.format( "点%c" , ( 'A' + control.size() + offset ) ) :
+					String.format( "%s:点%c" , shapeLabel,( 'A' + control.size() + offset ) );
+			}else{
+				controlLabel = ( shapeLabel == null) ?
+					String.format( "点%d" , control.size() + offset ) :
+					String.format( "%s:点%d" , control.size() + offset );
+			}
+			
 			for( ControlPoint2D point : control ){
 				// 既に同じ名前のラベルが存在した場合は offset を進めて作り直す
 				if( controlLabel.equals ( point.text ) ){ 

@@ -86,8 +86,7 @@ public final class SimulatorTest2 {
 						});
 					buttonPanel.add( button );
 				}
-
-				if( false ){ // 多角形(n>3) になると、ねじれが起きるので、どうするのか考えるところ
+				{
 					final JButton button = new JButton("四角形");
 					button.addActionListener( new ActionListener(){
 							@Override
@@ -100,6 +99,64 @@ public final class SimulatorTest2 {
 									new int_pair( rnd.nextInt(canvas.getWidth()), rnd.nextInt(canvas.getHeight() ) ),
 								};
 
+								for(int i = 1 ; i< src.length ; ++i ){
+									if( src[0].y > src[i].y ){
+										int_pair.swap( src[0] , src[i] );
+									}
+								}
+								
+								final int_pair base = src[0];
+								java.util.Arrays.sort( src , 1, src.length ,new java.util.Comparator<int_pair>(){
+										@Override
+										public int compare( int_pair l , int_pair r ){
+											float lv = base == l ? 0f : int_pair.theta( base , l );
+											float rv = base == r ? 0f : int_pair.theta( base , r );
+											if( lv == rv ){
+												return 0;
+											}else{
+												return ( lv < rv ) ? 1 : -1;
+											}
+										}
+									});
+								canvas.addDrawObject( buildDrawObject( src ) );
+								canvas.repaint();
+								return;
+							}
+						});
+					buttonPanel.add( button );
+				}
+
+				{
+					final JButton button = new JButton("test1");
+					final int pNum = 256;
+					button.addActionListener( new ActionListener(){
+							@Override
+							public void actionPerformed( ActionEvent event ){
+								Random rnd = new Random();
+								int_pair src[] = new int_pair[pNum];
+								for( int i = 0; i < src.length ; ++i ){
+									src[i] = new int_pair( rnd.nextInt(canvas.getWidth()), rnd.nextInt(canvas.getHeight() ) );
+								}
+
+								for(int i = 1 ; i< src.length ; ++i ){
+									if( src[0].y > src[i].y ){
+										int_pair.swap( src[0] , src[i] );
+									}
+								}
+								
+								final int_pair base = src[0];
+								java.util.Arrays.sort( src , 1, src.length ,new java.util.Comparator<int_pair>(){
+										@Override
+										public int compare( int_pair l , int_pair r ){
+											float lv = base == l ? 0f : int_pair.theta( base , l );
+											float rv = base == r ? 0f : int_pair.theta( base , r );
+											if( lv == rv ){
+												return 0;
+											}else{
+												return ( lv < rv ) ? 1 : -1;
+											}
+										}
+									});
 								canvas.addDrawObject( buildDrawObject( src ) );
 								canvas.repaint();
 								return;
