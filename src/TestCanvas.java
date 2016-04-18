@@ -195,8 +195,9 @@ public class TestCanvas extends javax.swing.JComponent {
 					new java.awt.font.TextMeasurer( aci , g2.getFontRenderContext() ).getLayout( aci.getBeginIndex() , aci.getEndIndex());
 				final float label_x = Math.min( Math.max( 0 , xs - ( layout.getAdvance() / 2.0f ) ),
 																				( (float)canvas.getWidth() - ( layout.getAdvance() )));
-				final float label_y = Math.min( Math.max( layout.getAscent() , ys - ( layout.getBaseline() / 2.0f)  ),
-																				( (float)canvas.getHeight() - (layout.getBaseline() /2.0f)) );
+				final float label_y = Math.min( Math.max( layout.getAscent() , ys + ( layout.getAscent() / 2.0f) ) ,
+																				( (float)canvas.getHeight() - (layout.getBaseline() )) );
+
 				g2.drawString( shapeLabel , label_x , label_y );
 			}
 			for( ControlPoint2D point : control ){
@@ -394,26 +395,37 @@ public class TestCanvas extends javax.swing.JComponent {
 	/**
 		 描画オブジェクトを追加する。
 	 */
-	public synchronized void addDrawObject(DrawObject drawObject){
+	public synchronized void addDrawObject(DrawObject drawObject ){
+		addDrawObject( drawObject , false );
+	}
+
+	/**
+		 描画オブジェクトを追加する。
+	 */
+	public synchronized void addDrawObject(DrawObject drawObject, boolean enableLabel){
 		//objects.add(drawObject);
 		final Color color = Color.black;
 		final DrawableShape shape;
-		switch( drawObject.points.size() ){
-		case 1:
-			shape = new DrawableShape(null , color );
-			break;
-		case 2:
-			shape = new DrawableShape("直線" , color );
-			break;
-		case 3:
-			shape = new DrawableShape("三角形" , color );
-			break;
-		case 4:
-			shape = new DrawableShape("四角形" , color );
-			break;
-		default:
-			shape = new DrawableShape("多角形" , color );
-			break;
+		if( enableLabel ){
+			switch( drawObject.points.size() ){
+			case 1:
+				shape = new DrawableShape(null , color );
+				break;
+			case 2:
+				shape = new DrawableShape("直線" , color );
+				break;
+			case 3:
+				shape = new DrawableShape("三角形" , color );
+				break;
+			case 4:
+				shape = new DrawableShape("四角形" , color );
+				break;
+			default:
+				shape = new DrawableShape("多角形" , color );
+				break;
+			}
+		}else{
+			shape = new DrawableShape( null , color );
 		}
 		
 		for( int index = 0;  index < drawObject.points.size() ; ++index ){
