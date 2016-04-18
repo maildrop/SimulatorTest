@@ -5,11 +5,14 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 /**
+
 	 
  */
 public class TestCanvas extends javax.swing.JComponent {
 	public static final int CANVAS_X_MAX = 600;
 	public static final int CANVAS_Y_MAX = 400;
+
+	private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TestCanvas.class.getName());
 
 	public ArrayList<Point> points;
 	public ArrayList<DrawObject> objects;
@@ -60,7 +63,7 @@ public class TestCanvas extends javax.swing.JComponent {
 
 		g2.setColor( previousColor ); // 一度前景色に戻す
 		
-		System.out.printf("paint\n");
+		logger.info( "paint" );
 		
 		for( final DrawObject drawObj : objects ){ // 素直に 拡張 for 文を使う
 			drawObjects( g2 , drawObj );
@@ -89,8 +92,15 @@ public class TestCanvas extends javax.swing.JComponent {
 			new java.text.AttributedString( label ).getIterator();
 		java.awt.font.TextMeasurer tm =  new java.awt.font.TextMeasurer( aci, g2.getFontRenderContext() );
 		java.awt.font.TextLayout layout = tm.getLayout( aci.getBeginIndex() , aci.getEndIndex() );
+
+		// 描画位置を示すためのテスト
 		//g2.fill( new java.awt.geom.Rectangle2D.Float( x ,  y ,  layout.getAdvance(), (layout.getAscent() +  layout.getBaseline() ) ) );
-		g2.drawString(label, x - (layout.getAdvance() / 2.0f) , y  -( layout.getBaseline() + layout.getAscent()) );
+
+		// 画面外へ描画されることを抑制
+		final float label_y = Math.max( layout.getAscent() ,
+																		y -( layout.getBaseline() + layout.getAscent()) ); 
+		final float label_x = Math.max( 0 , x - (layout.getAdvance() / 2.0f) ); // TODO 右側は、飛び出す
+		g2.drawString(label, label_x , label_y  );
 	}
 
 	/**
