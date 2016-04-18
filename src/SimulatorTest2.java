@@ -52,26 +52,67 @@ public final class SimulatorTest2 {
 			{ // 南側に配置するパネルを作成
 				JPanel buttonPanel = new JPanel();
 				buttonPanel.setLayout( new java.awt.FlowLayout() );
+
 				
-				{ // 第一要素 TEST ボタン
-					final JButton button = new JButton( "TEST" );
-					final Pen pen = new Pen( canvas );
+				{
+					final JButton button = new JButton( "直線" );
 					button.addActionListener( new ActionListener(){
 							@Override
 							public void actionPerformed( ActionEvent event ){
-								Test( pen );
+								Random rnd = new Random();
+								int_pair src[] = {
+									new int_pair( rnd.nextInt(canvas.getWidth()), rnd.nextInt(canvas.getHeight() ) ),
+									new int_pair( rnd.nextInt(canvas.getWidth()), rnd.nextInt(canvas.getHeight() ) )
+								};
+								if( src[0].y > src[1].y ){
+									int_pair.swap( src[0], src[1] );
+								}
+								canvas.addDrawObject( buildDrawObject( src ) );
+								canvas.repaint();
+								return;
+							}
+						});
+					buttonPanel.add( button );
+				}
+
+				{ 
+					final JButton button = new JButton( "三角形" );
+					button.addActionListener( new ActionListener(){
+							@Override
+							public void actionPerformed( ActionEvent event ){
+								Test( new Pen( canvas ) );
+								return;
+							}
+						});
+					buttonPanel.add( button );
+				}
+
+				if( false ){ // 多角形(n>3) になると、ねじれが起きるので、どうするのか考えるところ
+					final JButton button = new JButton("四角形");
+					button.addActionListener( new ActionListener(){
+							@Override
+							public void actionPerformed( ActionEvent event ){
+								Random rnd = new Random();
+								int_pair src[] = {
+									new int_pair( rnd.nextInt(canvas.getWidth()), rnd.nextInt(canvas.getHeight() ) ),
+									new int_pair( rnd.nextInt(canvas.getWidth()), rnd.nextInt(canvas.getHeight() ) ),
+									new int_pair( rnd.nextInt(canvas.getWidth()), rnd.nextInt(canvas.getHeight() ) ),
+									new int_pair( rnd.nextInt(canvas.getWidth()), rnd.nextInt(canvas.getHeight() ) ),
+								};
+
+								canvas.addDrawObject( buildDrawObject( src ) );
+								canvas.repaint();
 								return;
 							}
 						});
 					buttonPanel.add( button );
 				}
 				
-				{ // 第二要素 CLEAR ボタン
+				{ // CLEAR ボタン
 					final JButton button = new JButton( "CLEAR" );
 					button.addActionListener( new ActionListener(){
 							@Override
 							public void actionPerformed( ActionEvent event ){
-								System.out.printf("clear");
 								canvas.clear();
 								return;
 							}
@@ -124,6 +165,42 @@ public final class SimulatorTest2 {
 		
 	};
 
+	/**
+		 int_pair の配列から ArrayList&lt;Point&gt; を作成する
+	 */
+	private static final ArrayList<Point> buildPointArrayList( int_pair src[] ){
+		final java.util.concurrent.Callable<String> labelGen = new java.util.concurrent.Callable<String>(){
+				int i = 0;
+				public synchronized final String call(){
+					return String.format( "点%c" , 'A' + (i++) );
+				}
+		};
+		ArrayList<Point> points = new ArrayList<Point>();
+		for( int_pair p : src ){
+			try{
+				points.add( new Point( p.x , p.y , labelGen.call() ) );
+			}catch( Exception e ){
+				points.add( new Point( p.x , p.y , e.toString() ) );
+			}
+		}
+		if( false ){
+			switch( points.size() ){
+			case 3:
+				System.out.println(String.format( "%.1f度",Ruler.getAngle(points.get(0) , points.get(1) , points.get(2) ) ));
+				break;
+			default:
+				;
+			}
+		}
+		return points;
+	}
+	
+	/**
+		 DrawObject を構築する。
+	 */
+	private static final DrawObject buildDrawObject( int_pair src[] ){
+		return new DrawObject( buildPointArrayList( src ) );
+	}
 	
 	public static void Test(Pen pen){
 		Random rnd = new Random();
@@ -146,30 +223,11 @@ public final class SimulatorTest2 {
 		if( int_pair.theta( src[0] , src[1] ) < int_pair.theta( src[0], src[2] ) ){
 			int_pair.swap( src[1] , src[2] );
 		}
-
 		
-		final java.util.concurrent.Callable<String> labelGen = new java.util.concurrent.Callable<String>(){
-				int i = 0;
-				public synchronized final String call(){
-					return String.format( "点%c" , 'A' + (i++) );
-				}
-		};
-
-		ArrayList<Point> points = new ArrayList<Point>();
-		for( int_pair p : src ){
-			try{
-				points.add( new Point( p.x , p.y , labelGen.call() ) );
-			}catch( Exception e ){
-				points.add( new Point( p.x , p.y , e.toString() ) );
-			}
-		}
-
-		DrawObject sankaku = new DrawObject(points);
-		sankaku.setText();
-
+		DrawObject sankaku = buildDrawObject( src );
+		// sankaku.setText(); // 無意味
 		pen.Draw(sankaku);
 		
-		System.out.println(String.format( "%.1f度",Ruler.getAngle(points.get(0) , points.get(1) , points.get(2) ) ));
 	}
 
 	/**
