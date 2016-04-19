@@ -52,22 +52,13 @@ public final class SimulatorTest2 {
 			{ // 南側に配置するパネルを作成
 				JPanel buttonPanel = new JPanel();
 				buttonPanel.setLayout( new java.awt.FlowLayout() );
-
 				
 				{
 					final JButton button = new JButton( "直線" );
 					button.addActionListener( new ActionListener(){
 							@Override
 							public void actionPerformed( ActionEvent event ){
-								Random rnd = new Random();
-								int_pair src[] = {
-									new int_pair( rnd.nextInt(canvas.getWidth()), rnd.nextInt(canvas.getHeight() ) ),
-									new int_pair( rnd.nextInt(canvas.getWidth()), rnd.nextInt(canvas.getHeight() ) )
-								};
-								if( src[0].y > src[1].y ){
-									int_pair.swap( src[0], src[1] );
-								}
-								canvas.addDrawObject( buildDrawObject( src ) );
+								canvas.addDrawObject( createRundomizePolygonSample( 2 , canvas ) );
 								canvas.repaint();
 								return;
 							}
@@ -80,45 +71,20 @@ public final class SimulatorTest2 {
 					button.addActionListener( new ActionListener(){
 							@Override
 							public void actionPerformed( ActionEvent event ){
-								Test( new Pen( canvas ) );
+								canvas.addDrawObject( createRundomizePolygonSample( 3 , canvas ) );
+								canvas.repaint();
 								return;
 							}
 						});
 					buttonPanel.add( button );
 				}
+				
 				{
 					final JButton button = new JButton("四角形");
 					button.addActionListener( new ActionListener(){
 							@Override
 							public void actionPerformed( ActionEvent event ){
-								Random rnd = new Random();
-								int_pair src[] = {
-									new int_pair( rnd.nextInt(canvas.getWidth()), rnd.nextInt(canvas.getHeight() ) ),
-									new int_pair( rnd.nextInt(canvas.getWidth()), rnd.nextInt(canvas.getHeight() ) ),
-									new int_pair( rnd.nextInt(canvas.getWidth()), rnd.nextInt(canvas.getHeight() ) ),
-									new int_pair( rnd.nextInt(canvas.getWidth()), rnd.nextInt(canvas.getHeight() ) ),
-								};
-
-								for(int i = 1 ; i< src.length ; ++i ){
-									if( src[0].y > src[i].y ){
-										int_pair.swap( src[0] , src[i] );
-									}
-								}
-								
-								final int_pair base = src[0];
-								java.util.Arrays.sort( src , 1, src.length ,new java.util.Comparator<int_pair>(){
-										@Override
-										public int compare( int_pair l , int_pair r ){
-											float lv = base == l ? 0f : int_pair.theta( base , l );
-											float rv = base == r ? 0f : int_pair.theta( base , r );
-											if( lv == rv ){
-												return 0;
-											}else{
-												return ( lv < rv ) ? 1 : -1;
-											}
-										}
-									});
-								canvas.addDrawObject( buildDrawObject( src ) );
+								canvas.addDrawObject( createRundomizePolygonSample( 4 , canvas ) );
 								canvas.repaint();
 								return;
 							}
@@ -128,36 +94,10 @@ public final class SimulatorTest2 {
 
 				{
 					final JButton button = new JButton("test1");
-					final int pNum = 256;
 					button.addActionListener( new ActionListener(){
 							@Override
 							public void actionPerformed( ActionEvent event ){
-								Random rnd = new Random();
-								int_pair src[] = new int_pair[pNum];
-								for( int i = 0; i < src.length ; ++i ){
-									src[i] = new int_pair( rnd.nextInt(canvas.getWidth()), rnd.nextInt(canvas.getHeight() ) );
-								}
-
-								for(int i = 1 ; i< src.length ; ++i ){
-									if( src[0].y > src[i].y ){
-										int_pair.swap( src[0] , src[i] );
-									}
-								}
-								
-								final int_pair base = src[0];
-								java.util.Arrays.sort( src , 1, src.length ,new java.util.Comparator<int_pair>(){
-										@Override
-										public int compare( int_pair l , int_pair r ){
-											float lv = base == l ? 0f : int_pair.theta( base , l );
-											float rv = base == r ? 0f : int_pair.theta( base , r );
-											if( lv == rv ){
-												return 0;
-											}else{
-												return ( lv < rv ) ? 1 : -1;
-											}
-										}
-									});
-								canvas.addDrawObject( buildDrawObject( src ) );
+								canvas.addDrawObject( createRundomizePolygonSample( 256 , canvas ) );
 								canvas.repaint();
 								return;
 							}
@@ -176,6 +116,7 @@ public final class SimulatorTest2 {
 						});
 					buttonPanel.add( button );
 				}
+				
 				panel.add( buttonPanel, BorderLayout.SOUTH );
 			}
 		}
@@ -186,6 +127,35 @@ public final class SimulatorTest2 {
 		return;
 	}
 
+	private static final DrawObject createRundomizePolygonSample( int pNum , TestCanvas canvas){
+		Random rnd = new Random();
+		int_pair src[] = new int_pair[pNum];
+		for( int i = 0; i < src.length ; ++i ){
+			src[i] = new int_pair( rnd.nextInt(canvas.getWidth()), rnd.nextInt(canvas.getHeight() ) );
+		}
+		
+		for(int i = 1 ; i< src.length ; ++i ){
+			if( src[0].y > src[i].y ){
+				int_pair.swap( src[0] , src[i] );
+			}
+		}
+		
+		final int_pair base = src[0];
+		java.util.Arrays.sort( src , 1, src.length ,new java.util.Comparator<int_pair>(){
+				@Override
+				public int compare( int_pair l , int_pair r ){
+					float lv = base == l ? 0f : int_pair.theta( base , l );
+					float rv = base == r ? 0f : int_pair.theta( base , r );
+					if( lv == rv ){
+						return 0;
+					}else{
+						return ( lv < rv ) ? 1 : -1;
+					}
+				}
+			});
+		return buildDrawObject( src );
+	}
+	
 	private static class int_pair{
 		public int x;
 		public int y;
