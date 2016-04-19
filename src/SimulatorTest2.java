@@ -127,11 +127,40 @@ public final class SimulatorTest2 {
 		return;
 	}
 
-	private static final DrawObject createRundomizePolygonSample( int pNum , TestCanvas canvas){
+	/**
+		canvas の 幅さと高さに納まるように、頂点をランダムに選択してnNum角形のDrawObject を 
+		構築する。 頂点は、y軸が最も 0に近い点を最初に選び 以後左回りで SimpleClosePath を構築する。
+		createRundomizePolygonSample( int ,int ,int ) のコンビニエンスメソッド
+		@param pNum 作成する多角形の頂点の数
+		@param canvas 描画先のオブジェクト。オブジェクトの高さと幅を使用する。
+		@return 作成されたDrawObject
+	*/
+	private static final DrawObject createRundomizePolygonSample( int pNum , java.awt.Component canvas){
+		assert canvas != null : "canvas is not allowed null" ;
+		return createRundomizePolygonSample( pNum , canvas.getWidth() , canvas.getHeight() );
+	}
+
+	/**
+		 (0,0)-(width,height) に納まるように頂点をランダムに選択して、pNum 角形の DrawObject を構築する 
+		 頂点は、y軸が最も 0 に近い ( GUI 上では、もっとも上に位置する点）を最初に選び、以後左回りでSimpleClosePath を構築する。
+		 @param pNum 作成する多角形の頂点の数
+		 @param width 生成される頂点のx軸方向の最大値
+		 @param height 生成される頂点のy軸方向の最大値 
+		 @return 作成されたDrawObject
+	 */
+	private static final DrawObject createRundomizePolygonSample( int pNum , int width , int height ){
+		// 引数チェック 
+		assert pNum > 0 : "pNum must be natural number" ;
+		assert width > 0 ;
+		assert height > 0;
+		if( 0 < pNum ){
+			throw new IllegalArgumentException("pNum must be natural number");
+		}
+		
 		Random rnd = new Random();
 		int_pair src[] = new int_pair[pNum];
 		for( int i = 0; i < src.length ; ++i ){
-			src[i] = new int_pair( rnd.nextInt(canvas.getWidth()), rnd.nextInt(canvas.getHeight() ) );
+			src[i] = new int_pair( rnd.nextInt( width ), rnd.nextInt(height) );
 		}
 		
 		for(int i = 1 ; i< src.length ; ++i ){
@@ -227,34 +256,6 @@ public final class SimulatorTest2 {
 	 */
 	private static final DrawObject buildDrawObject( int_pair src[] ){
 		return new DrawObject( buildPointArrayList( src ) );
-	}
-	
-	public static void Test(Pen pen){
-		Random rnd = new Random();
-
-		// y 軸 の頂点に最も近い点を、基準点にもってきて、
-		// 左回りに点を整列させる。
-		int_pair src[] = {
-			new int_pair( rnd.nextInt(pen.canvas.getWidth()), rnd.nextInt(pen.canvas.getHeight() ) ),
-			new int_pair( rnd.nextInt(pen.canvas.getWidth()), rnd.nextInt(pen.canvas.getHeight() ) ),
-			new int_pair( rnd.nextInt(pen.canvas.getWidth()), rnd.nextInt(pen.canvas.getHeight() ) )
-		};
-		// 基準点を見つけるために、最小のy を持つ int_pair を int_pair[0] に持ってくる
-		if( src[0].y > src[1].y ){
-			int_pair.swap( src[0] , src[1] );
-		}
-		if( src[0].y > src[2].y ){
-			int_pair.swap( src[0] , src[2] ); 
-		}
-
-		if( int_pair.theta( src[0] , src[1] ) < int_pair.theta( src[0], src[2] ) ){
-			int_pair.swap( src[1] , src[2] );
-		}
-		
-		DrawObject sankaku = buildDrawObject( src );
-		// sankaku.setText(); // 無意味
-		pen.Draw(sankaku);
-		
 	}
 
 	/**
