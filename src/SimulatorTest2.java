@@ -217,7 +217,7 @@ public final class SimulatorTest2 {
 			}else if( dy < 0 ){
 				t = t + 4f;
 			}
-			return t; // t*90.0f が degree である。 Windowの座標系が上下逆なことに注意
+			return t; // t*90.0f が degree である。 Windowの座標系は、Y軸は下方向へ伸びることに注意
 		}
 		
 	};
